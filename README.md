@@ -2,7 +2,7 @@ Below is a ready-to-paste **README.md** for your GitHub profile repo (the one na
 
 ---
 
-# Hi, I’m Garth Goodwin 👋
+# Hi, I’m Logan Garth Goodwin 👋
 
 I’m an IT and cybersecurity-focused builder who likes hands-on troubleshooting, network design, and turning ideas into working projects. I believe the best way to learn is to build something you can use right away.
 
