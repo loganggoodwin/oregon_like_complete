@@ -1,7 +1,3 @@
-Below is a ready-to-paste **README.md** for your GitHub profile repo (the one named exactly like your GitHub username). I think it reads professional but still human, and it highlights your networking/cyber background plus the Oregon Trail–style Pygame project.
-
----
-
 # Hi, I’m Logan Garth Goodwin 👋
 
 I’m an IT and cybersecurity-focused builder who likes hands-on troubleshooting, network design, and turning ideas into working projects. I believe the best way to learn is to build something you can use right away.
