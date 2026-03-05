@@ -1,203 +1,176 @@
-Hi, I’m Logan Garth Goodwin 👋
+# Trail Game (Oregon-ish) – Python Project
 
-I’m an IT and cybersecurity professional who enjoys building, troubleshooting, and improving systems. I like working with technology at a practical level—whether that’s repairing computers, designing networks, building homelab environments, or developing small software projects. I believe the best way to truly learn technology is to build things, test them, break them, and then figure out how to fix them.
+A small **Oregon Trail–inspired survival game** built with **Python and Pygame**.
+The project focuses on learning game logic, UI systems, and event-driven programming while simulating a classic wagon trail journey.
 
-🔧 Areas I Enjoy Working In
+---
 
-Networking & Homelab Engineering
-Routing, segmentation, network troubleshooting, and experimenting with real-world network scenarios.
+# Features
 
-Cybersecurity & Defensive Security
-Risk analysis, incident response concepts, digital forensics fundamentals, and security best practices.
+## 🎮 Core Gameplay
 
-Systems Planning & Implementation
-Translating system requirements into real working technical solutions.
+* Travel along a **2000-mile trail**
+* Manage wagon resources and party health
+* Random trail events (weather, sickness, wagon damage, etc.)
+* Seasonal weather system
+* Morale and wagon condition tracking
 
-Hardware & System Repair
-Building and repairing computers, diagnosing hardware failures, and optimizing system performance.
+## 👥 Party System
 
-Python Projects
-Creating learning projects, automation scripts, and small applications.
+* Create a party of **five named travelers**
+* Each member has:
 
-🚀 Featured Project
-Trail Game (Oregon Trail–Inspired) — Python + Pygame
+  * Individual health
+  * Status conditions
+* Party health impacts survival events
 
-One of my recent projects is a small Oregon Trail–style simulation game built using Python and Pygame.
+## 💰 Starting Classes (Difficulty Levels)
 
-The goal of the project is to combine game mechanics, event simulation, and interactive systems into a working application.
+Choose your starting wealth:
 
-Core Features
+| Class        | Starting Money | Difficulty |
+| ------------ | -------------- | ---------- |
+| Rich         | $50,000        | Easy       |
+| Middle Class | $10,000        | Normal     |
+| Poor         | $500           | Hard       |
 
-Three Starting Difficulty Levels
+---
 
-Rich – $50,000 starting cash (easy)
+# 🦌 Hunting Mini-Game
 
-Middle Class – $10,000 starting cash
+Interactive hunting system:
 
-Poor – $500 starting cash (hard)
+* Click animals to shoot
+* Each shot costs **1 ammo**
+* Animals move across the screen
+* Different animals provide different food amounts
+* Missed shots still consume ammo
 
-Custom Party Creation
+Successful hunting increases food supplies for the wagon.
 
-Enter the names of five travelers
+---
 
-Each character has individual health and status
+# 🛒 Town Shop
 
-Trail Gameplay
+At towns you can purchase supplies.
 
-Travel across the map toward your destination
+### Shop Items
 
-Manage food, ammunition, medicine, cash, and wagon condition
+| Item        | Effect                   |
+| ----------- | ------------------------ |
+| Food        | Restores food supply     |
+| Ammo        | Used for hunting         |
+| Medicine    | Used when illness occurs |
+| Repair Kits | Restore wagon condition  |
 
-Adjust travel pace and ration levels
+The shop shows:
 
-Interactive Hunting Mini-Game
+* Prices
+* Projected cost
+* Remaining cash
 
-Click-to-shoot hunting
+---
 
-Moving animals (rabbit, deer, bear)
+# 🌧 Dynamic Trail Events
 
-Each shot consumes ammo
+Examples include:
 
-Successful hits increase food supplies
+* Party members getting sick
+* Wagon damage
+* Weather changes
+* Hunting success or failure
+* Morale changes
 
-Trail Events
+Events are logged in the **Trail Log panel**.
 
-Illness, wagon damage, bandits, weather changes, and random encounters
+---
 
-River Crossings
+# 💾 Save / Load System
 
-Choose between Ford, Caulk, Ferry, or Wait
+The game supports saving progress.
 
-Towns & Landmarks
+**Controls**
 
-Stop along the trail to shop, rest, or continue traveling
+| Key | Action    |
+| --- | --------- |
+| S   | Save game |
+| L   | Load game |
 
-Dynamic Shop System
+Save file created:
 
-Enter purchase quantities
+```text
+trail_save.json
+```
 
-Prices adjust over time
+---
 
-Save / Load System
+# 🖥 Interface
 
-Game progress saved to JSON
+The interface includes:
 
-▶️ Running the Game
+* Party status panel
+* Trail progress bar
+* Event log
+* Inventory display
+* Action buttons
 
-Install the dependency:
+Actions available:
 
+* Travel
+* Rest
+* Hunt
+* Shop
+* Toggle pace
+* Toggle rations
+
+---
+
+# ▶ Running the Game
+
+Install dependencies:
+
+```bash
 pip install pygame
+```
 
 Run the game:
 
+```bash
 python oregon_like_complete.py
-🎮 Controls
+```
 
-Use on-screen buttons for most actions
+---
 
-In the Shop:
+# 🧪 Technologies Used
 
-Click a field
+* Python
+* Pygame
+* JSON save system
+* Event-driven UI
 
-Type a number
+---
 
-Use Backspace to edit
+# 📌 Future Improvements
 
-S = Save game
+Possible future upgrades:
 
-L = Load game
+* More animal types in hunting
+* River crossing mini-games
+* Party skill system
+* More town types
+* Map visualization
+* Sound effects and music
+* Expanded random events
 
-Save file:
+---
 
-trail_save.json
-🧪 Homelab & Technologies I Like Working With
+# Author
 
-I enjoy experimenting with technology in a hands-on homelab environment, including:
+**Logan Garth Goodwin**
 
-Network testing and troubleshooting
-
-Virtualization environments
-
-Media servers and storage systems
-
-Security testing scenarios
-
-Technologies and tools I frequently work with include:
-
-Linux environments
-
-Virtual machines and lab networks
-
-Proton VPN
-
-Plex media server
-
-Self-hosted services
-
-📜 Certifications
-
-CompTIA A+
-
-CompTIA IT Fundamentals+
-
-CompTIA Network+
-
-CompTIA Security+
-
-EC-Council Certifications:
-
-Digital Forensics Essentials (DFE)
-
-Ethical Hacking Essentials (EHE)
-
-Network Defense Essentials (NDE)
-
-TestOut Certifications:
-
-Network Pro
-
-PC Pro
-
-IT Fundamentals Pro
-
-Currently working on:
-
-CompTIA Project+
-
-🎓 Education
-
-Bachelor of Science — Information Technology
-Focus: Cybersecurity
-
-My academic work includes:
-
-Network architecture and design
-
-Cybersecurity risk analysis
-
-IT systems implementation
-
-Incident response planning
-
-Security policy development
-
-📫 Connect With Me
+IT / Cybersecurity student focused on building practical projects and learning through hands-on experimentation.
 
 LinkedIn
 https://www.linkedin.com/in/logan-g-goodwin/
 
-📌 Notes
-
-I enjoy building projects that combine technical learning with practical implementation.
-
-If you'd like, I can also add:
-
-GitHub profile statistics
-
-Cybersecurity badges
-
-Homelab diagrams
-
-A technical skills section
-
-to make this README more dynamic.
+---
