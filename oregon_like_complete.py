@@ -44,6 +44,57 @@ def clamp(v, lo, hi):
 def draw_text(surface, text, x, y, color=BLACK, font=FONT):
     surface.blit(font.render(text, True, color), (x, y))
 
+
+def wrap_text(text: str, font: pygame.font.Font, max_width: int):
+    """Return a list of wrapped lines that fit max_width."""
+    words = text.split(" ")
+    lines = []
+    cur = ""
+    for w in words:
+        test = (cur + " " + w).strip()
+        if not test:
+            continue
+        if font.size(test)[0] <= max_width:
+            cur = test
+        else:
+            if cur:
+                lines.append(cur)
+            # Hard-split a single long token if needed
+            if font.size(w)[0] > max_width:
+                chunk = ""
+                for ch in w:
+                    t2 = chunk + ch
+                    if font.size(t2)[0] <= max_width:
+                        chunk = t2
+                    else:
+                        if chunk:
+                            lines.append(chunk)
+                        chunk = ch
+                cur = chunk
+            else:
+                cur = w
+    if cur:
+        lines.append(cur)
+    return lines
+
+def draw_text_clipped(surface, text, x, y, clip_rect: pygame.Rect, color=BLACK, font=FONT):
+    prev_clip = surface.get_clip()
+    surface.set_clip(clip_rect)
+    surface.blit(font.render(text, True, color), (x, y))
+    surface.set_clip(prev_clip)
+
+def draw_wrapped_text(surface, text, x, y, clip_rect: pygame.Rect, color=BLACK, font=FONT, line_height=None, bullet_prefix=""):
+    """Word-wrap text and draw inside clip_rect starting at (x,y). Returns final y."""
+    if line_height is None:
+        line_height = font.get_linesize()
+    max_width = max(10, clip_rect.width - (x - clip_rect.x) - 8)
+    lines = wrap_text(text, font, max_width)
+    for i, line in enumerate(lines):
+        prefix = bullet_prefix if (i == 0 and bullet_prefix) else (" " * len(bullet_prefix) if bullet_prefix else "")
+        draw_text_clipped(surface, prefix + line, x, y, clip_rect, color=color, font=font)
+        y += line_height
+    return y
+
 def weighted_choice(weighted_items):
     total = sum(w for _, w in weighted_items)
     r = random.uniform(0, total)
@@ -980,14 +1031,17 @@ def main():
         if game.next_landmark_index < len(game.landmarks):
             next_lm = game.landmarks[game.next_landmark_index]
             dist = max(0, next_lm.miles - game.miles_traveled)
-            draw_text(screen, f"Next: {next_lm.name} ({next_lm.kind})", 740, 180, BLACK, FONT)
-            draw_text(screen, f"In: {dist} miles", 740, 205, BLACK, FONT)
-
-        y = 240
+            # Next landmark (wrapped/clipped so it always fits)
+            info_clip = pygame.Rect(log_rect.x + 20, log_rect.y + 58, log_rect.width - 40, 96)
+            draw_wrapped_text(screen, f"Next: {next_lm.name} ({next_lm.kind})", log_rect.x + 20, log_rect.y + 58, info_clip, color=BLACK, font=FONT, line_height=22)
+            draw_text_clipped(screen, f"In: {dist} miles", log_rect.x + 20, log_rect.y + 58 + 68, info_clip, color=BLACK, font=FONT)
+        y = log_rect.y + 175
+        clip = pygame.Rect(log_rect.x + 20, log_rect.y + 165, log_rect.width - 40, log_rect.height - 185)
         for line in game.log:
-            draw_text(screen, f"- {line}", 740, y, BLACK, FONT)
-            y += 24
-
+            y = draw_wrapped_text(screen, line, log_rect.x + 20, y, clip, color=BLACK, font=FONT, line_height=22, bullet_prefix="- ")
+            y += 2
+            if y > clip.bottom - 22:
+                break
         btn_travel.draw(screen); btn_rest.draw(screen); btn_hunt.draw(screen); btn_shop.draw(screen)
         btn_pace.draw(screen); btn_ration.draw(screen); btn_save.draw(screen); btn_load.draw(screen); btn_reset.draw(screen)
 
@@ -999,8 +1053,12 @@ def main():
             pygame.draw.rect(screen, DARK, modal, 2, border_radius=18)
             draw_text(screen, game.modal_title, modal.x + 25, modal.y + 20, BLACK, FONT_H)
             yy = modal.y + 75
+            body_clip = pygame.Rect(modal.x + 25, modal.y + 70, modal.width - 50, modal.height - 150)
             for line in game.modal_body:
-                draw_text(screen, line, modal.x + 25, yy, BLACK, FONT); yy += 28
+                yy = draw_wrapped_text(screen, line, modal.x + 25, yy, body_clip, color=BLACK, font=FONT, line_height=24)
+                yy += 2
+                if yy > body_clip.bottom - 24:
+                    break
             build_modal_buttons()
             for b, _ in modal_buttons: b.draw(screen)
 
@@ -1013,24 +1071,25 @@ def main():
             draw_text(screen, "Shop", modal.x + 25, modal.y + 20, BLACK, FONT_H)
             prices = game.shop_prices()
             draw_text(screen, "Prices:", modal.x + 25, modal.y + 70, BLACK, FONT_B)
-            draw_text(screen, f"10 food = ${prices['food10']}", modal.x + 25, modal.y + 100)
-            draw_text(screen, f"1 ammo  = ${prices['ammo1']}", modal.x + 25, modal.y + 125)
-            draw_text(screen, f"1 med   = ${prices['med1']}", modal.x + 25, modal.y + 150)
-            draw_text(screen, f"repair kit = ${prices['repair']} (adds +18% wagon)", modal.x + 25, modal.y + 175)
-
-            draw_text(screen, "Enter quantities:", modal.x + 400, modal.y + 70, BLACK, FONT_B)
-            shop_food.rect.topleft = (modal.x + 430, modal.y + 95)
-            shop_ammo.rect.topleft = (modal.x + 430, modal.y + 175)
-            shop_med.rect.topleft = (modal.x + 430, modal.y + 255)
-            shop_rep.rect.topleft = (modal.x + 430, modal.y + 335)
+            prices_clip = pygame.Rect(modal.x + 25, modal.y + 98, 360, 140)
+            yy_p = modal.y + 100
+            yy_p = draw_wrapped_text(screen, f"10 food = ${prices['food10']}", modal.x + 25, yy_p, prices_clip, color=BLACK, font=FONT, line_height=24)
+            yy_p = draw_wrapped_text(screen, f"1 ammo = ${prices['ammo1']}", modal.x + 25, yy_p, prices_clip, color=BLACK, font=FONT, line_height=24)
+            yy_p = draw_wrapped_text(screen, f"1 med = ${prices['med1']}", modal.x + 25, yy_p, prices_clip, color=BLACK, font=FONT, line_height=24)
+            yy_p = draw_wrapped_text(screen, f"repair kit = ${prices['repair']} (adds +18% wagon)", modal.x + 25, yy_p, prices_clip, color=BLACK, font=FONT, line_height=24)
+            draw_text(screen, "Enter quantities:", modal.x + 400, modal.y + 45, BLACK, FONT_B)
+            shop_food.rect.topleft = (modal.x + 430, modal.y + 115)
+            shop_ammo.rect.topleft = (modal.x + 430, modal.y + 195)
+            shop_med.rect.topleft = (modal.x + 430, modal.y + 275)
+            shop_rep.rect.topleft = (modal.x + 430, modal.y + 355)
             shop_food.draw(screen); shop_ammo.draw(screen); shop_med.draw(screen); shop_rep.draw(screen)
 
             projected = shop_food.value_int()*prices["food10"] + shop_ammo.value_int()*prices["ammo1"] + shop_med.value_int()*prices["med1"] + shop_rep.value_int()*prices["repair"]
             draw_text(screen, f"Projected cost: ${projected}", modal.x + 25, modal.y + 235, BLACK, FONT_B)
             draw_text(screen, f"Your cash: ${game.cash}", modal.x + 25, modal.y + 265, BLACK, FONT)
 
-            shop_buy.rect.topleft = (modal.x + 430, modal.y + 395)
-            shop_leave.rect.topleft = (modal.x + 610, modal.y + 395)
+            shop_buy.rect.topleft = (modal.x + 430, modal.y + 415)
+            shop_leave.rect.topleft = (modal.x + 610, modal.y + 415)
             shop_buy.draw(screen); shop_leave.draw(screen)
 
         if game.mode == "HUNT":
