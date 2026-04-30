@@ -20,6 +20,8 @@ GREEN = (60, 180, 90)
 BLUE = (80, 140, 220)
 YELLOW = (235, 200, 70)
 ORANGE = (245, 160, 60)
+SKY_TOP = (184, 220, 255)
+SKY_BOTTOM = (245, 228, 192)
 
 pygame.init()
 pygame.display.set_caption("Trail Game (Oregon-ish) - Complete")
@@ -803,13 +805,64 @@ def draw_bar(x, y, w, h, pct, label, color_fill):
     pygame.draw.rect(screen, DARK, (x, y, w, h), 2, border_radius=8)
     draw_text(screen, f"{label}: {pct}%", x + 8, y + 6, BLACK, FONT)
 
+def draw_alpha_rect(surface, color, rect, radius=0):
+    """Draw a transparent rectangle safely on the display surface."""
+    temp = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+    pygame.draw.rect(temp, color, temp.get_rect(), border_radius=radius)
+    surface.blit(temp, rect.topleft)
+
 def draw_panel(rect, title):
+    shadow = rect.move(4, 5)
+    draw_alpha_rect(screen, (0, 0, 0, 35), shadow, 14)
     pygame.draw.rect(screen, (250, 250, 250), rect, border_radius=14)
     pygame.draw.rect(screen, DARK, rect, 2, border_radius=14)
     draw_text(screen, title, rect.x + 20, rect.y + 12, BLACK, FONT_B)
 
+def make_background_surface():
+    """Pre-render the trail background once so the main loop stays smooth."""
+    background = pygame.Surface((WIDTH, HEIGHT))
+    for y in range(HEIGHT):
+        t = y / max(1, HEIGHT - 1)
+        col = (
+            int(SKY_TOP[0] + (SKY_BOTTOM[0] - SKY_TOP[0]) * t),
+            int(SKY_TOP[1] + (SKY_BOTTOM[1] - SKY_TOP[1]) * t),
+            int(SKY_TOP[2] + (SKY_BOTTOM[2] - SKY_TOP[2]) * t),
+        )
+        pygame.draw.line(background, col, (0, y), (WIDTH, y))
+
+    # Distant hills
+    pygame.draw.ellipse(background, (130, 180, 120), (-140, 470, 620, 220))
+    pygame.draw.ellipse(background, (110, 160, 100), (230, 480, 700, 240))
+    pygame.draw.ellipse(background, (95, 140, 90), (700, 495, 500, 220))
+    return background
+
+def draw_weather_icon(surface, weather, x, y):
+    if weather in ("Rain", "Storm"):
+        pygame.draw.circle(surface, (180, 180, 190), (x, y), 16)
+        pygame.draw.circle(surface, (165, 165, 180), (x + 15, y + 2), 14)
+        pygame.draw.circle(surface, (195, 195, 205), (x - 12, y + 4), 12)
+        for i in (-10, 2, 14):
+            pygame.draw.line(surface, BLUE, (x + i, y + 18), (x + i - 3, y + 30), 3)
+    elif weather == "Snow":
+        snow = (225, 240, 255)
+        pygame.draw.circle(surface, snow, (x, y), 14, 2)
+        pygame.draw.line(surface, snow, (x - 12, y), (x + 12, y), 2)
+        pygame.draw.line(surface, snow, (x, y - 12), (x, y + 12), 2)
+        pygame.draw.line(surface, snow, (x - 8, y - 8), (x + 8, y + 8), 2)
+        pygame.draw.line(surface, snow, (x - 8, y + 8), (x + 8, y - 8), 2)
+    elif weather == "Hot":
+        pygame.draw.circle(surface, YELLOW, (x, y), 14)
+        for angle in range(0, 360, 45):
+            direction = pygame.math.Vector2(1, 0).rotate(angle)
+            end = (x + int(22 * direction.x), y + int(22 * direction.y))
+            pygame.draw.line(surface, ORANGE, (x, y), end, 2)
+    else:
+        pygame.draw.circle(surface, YELLOW, (x, y), 14)
+        pygame.draw.circle(surface, ORANGE, (x, y), 14, 2)
+
 def main():
     game = Game()
+    background = make_background_surface()
 
     btn_rich = Button((390, 260, 320, 65), "Rich ($50,000)")
     btn_mid = Button((390, 345, 320, 65), "Middle Class ($10,000)")
@@ -980,7 +1033,7 @@ def main():
                 game.advance_day(context="travel")
                 game.mode = "MAIN"
 
-        screen.fill(WHITE)
+        screen.blit(background, (0, 0))
 
         if game.mode == "START_CLASS":
             draw_text(screen, "Choose Your Starting Class", 320, 140, BLACK, FONT_H)
@@ -995,14 +1048,22 @@ def main():
             btn_start_journey.draw(screen); btn_reset.draw(screen)
             pygame.display.flip(); continue
 
-        draw_text(screen, "Trail Game (Oregon-ish) - Complete", 40, 18, BLACK, FONT_H)
-        draw_text(screen, f"Day {game.day} | Season: {game.season} | Weather: {game.weather} | Class: {game.player_class} | Pace: {game.pace} | Rations: {game.rations}", 40, 56, BLACK, FONT)
+        header = pygame.Rect(24, 12, 1052, 112)
+        draw_alpha_rect(screen, (255, 255, 255, 220), header, 16)
+        pygame.draw.rect(screen, DARK, header, 2, border_radius=16)
+        draw_text(screen, "Trail Game (Oregon-ish) - Complete", 40, 24, BLACK, FONT_H)
+        draw_text(screen, f"Day {game.day} | Season: {game.season} | Weather: {game.weather} | Class: {game.player_class} | Pace: {game.pace} | Rations: {game.rations}", 40, 62, BLACK, FONT)
+        draw_weather_icon(screen, game.weather, 1040, 48)
 
-        pygame.draw.rect(screen, GRAY, (40, 90, 1020, 28), border_radius=10)
+        pygame.draw.rect(screen, (220, 220, 220), (40, 90, 1020, 28), border_radius=10)
         pct = clamp(int((game.miles_traveled / MILES_TO_GOAL) * 100), 0, 100)
         pygame.draw.rect(screen, BLUE, (40, 90, int(1020 * (pct / 100.0)), 28), border_radius=10)
         pygame.draw.rect(screen, DARK, (40, 90, 1020, 28), 2, border_radius=10)
         draw_text(screen, f"Miles: {game.miles_traveled}/{MILES_TO_GOAL} ({pct}%)", 50, 95)
+        wagon_x = 40 + int(1020 * (pct / 100.0))
+        wagon_x = clamp(wagon_x, 48, 1052)
+        pygame.draw.circle(screen, ORANGE, (wagon_x, 104), 8)
+        pygame.draw.circle(screen, DARK, (wagon_x, 104), 8, 2)
 
         party_rect = pygame.Rect(40, 140, 660, 430)
         draw_panel(party_rect, "Party Status")

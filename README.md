@@ -108,8 +108,11 @@ trail_save.json
 
 The interface includes:
 
+* Gradient trail background with distant hills
+* Header panel with day, season, weather, class, pace, and rations
+* Weather icon next to the current weather
 * Party status panel
-* Trail progress bar
+* Trail progress bar with a wagon marker
 * Event log
 * Inventory display
 * Action buttons
